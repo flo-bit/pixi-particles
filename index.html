@@ -6,6 +6,8 @@
       content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0"
     />
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pixi.js/7.1.0/pixi.min.js"></script>
+    <script src="https://flo-bit.github.io/every-noise/noise.min.js"></script>
+    <script src="./particles.js"></script>
   </head>
   <body style="overflow: hidden">
     <script>
@@ -20,6 +22,7 @@
             antialias: true,
             transparent: false,
             resolution: 1,
+            backgroundColor: 0x000000,
           });
           this.keys = {};
           document.addEventListener("keydown", this.keyDown.bind(this));
@@ -41,14 +44,32 @@
           let radius =
             Math.min(this.app.screen.width, this.app.screen.height) / 3;
           /* START */
-          this.circle = new PIXI.Graphics();
-          this.circle.beginFill(0xaa0000);
-          this.circle.drawCircle(0, 0, radius / 5);
-          this.circle.endFill();
-          this.app.stage.addChild(this.circle);
+          this.particles = new Particles({
+            renderer: this.app.renderer,
+            particleSize: 2,
+            //squares: true,
+          });
+          this.noise = new Noise({ scl: 0.008, oct: 3 });
+          this.particles.forces.push((part) => {
+            return {
+              x: this.noise.get(part.x, part.y) * 5,
+              y: 0,
+            };
+          });
+          this.particles.x = this.app.screen.width / 2;
+          this.particles.y = this.app.screen.height / 2;
+          this.app.stage.addChild(this.particles);
 
-          this.circle.x = this.app.screen.width / 2 + radius * Math.cos(0);
-          this.circle.y = this.app.screen.height / 2 + radius * Math.sin(0);
+          this.text = new PIXI.Text("1000", {
+            fontFamily: "Arial",
+            fontSize: 35,
+            fill: 0xffffff,
+            align: "left",
+          });
+          this.text.anchor.x = 1;
+          this.text.x = window.innerWidth - 20;
+          this.text.y = 10;
+          this.app.stage.addChild(this.text);
           /* END */
         }
         animate() {
@@ -57,15 +78,39 @@
           let total = PIXI.Ticker.shared.lastTime / 1000.0;
 
           /* START */
-          let radius =
-            Math.min(this.app.screen.width, this.app.screen.height) / 3;
-          this.circle.x = this.app.screen.width / 2 + radius * Math.cos(total);
-          this.circle.y = this.app.screen.height / 2 + radius * Math.sin(total);
+          this.particles.update(elapsed);
+          this.particles.spawn({
+            x: {
+              min: -this.app.screen.width / 2,
+              max: this.app.screen.width / 2,
+            },
+            y: -this.app.screen.height / 2,
+            //y: (Math.random() - 0.5) * 400,
+            //vx: () => (Math.random() - 0.5) * 200,
+            vy: (p) => p.size * 100 + 50,
+            lifetime: () => (Math.random() < 0.1 ? Math.random() * 5 : 0),
+            //color: () => Math.random() * 0xff,
+            alpha: () => Math.random() * 0.5 + 0.5,
+            size: () => Math.pow(Math.random(), 3) * 2,
+            count: 5,
+            check: (p) => p.y > this.app.screen.height / 2,
+          });
+
+          this.text.text = this.particles.children.length;
+
+          this.noise.shiftBy(0, 1);
+
           /* END */
         }
 
         windowResized() {
           this.app.renderer.resize(window.innerWidth, window.innerHeight);
+
+          this.particles.x = this.app.screen.width / 2;
+          this.particles.y = this.app.screen.height / 2;
+
+          this.text.x = window.innerWidth - 20;
+          this.text.y = 10;
         }
         keyDown(event) {
           this.keys[event.key] = true;
