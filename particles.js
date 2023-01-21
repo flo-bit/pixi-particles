@@ -1,22 +1,62 @@
 class ParticleEmitter {
   constructor(opts) {
-    opts = opts || {};
-    this.type = opts.type || "point";
-    this.particlesPerSecond = opts.particlesPerSecond || 100;
+    this.type = opts?.type ?? "point";
 
-    this.particleSettings = opts.particleSettings || particleSettings;
+    this.size = opts?.size ?? 10;
+    this.center = opts?.center ?? new Vector(0, 0);
+    this.a = opts?.a;
+    this.b = opts?.b;
+    if (this.a && this.b) {
+      this.vec = this.b.clone().sub(this.a);
+    }
+
+    this.particlesPerSecond = opts?.particlesPerSecond ?? 100;
+
+    this.particleSettings = opts?.particleSettings ?? opts?.settings ?? {};
+
+    this.dt = 0;
+  }
+
+  getPos() {
+    if (this.type == "point") {
+      return this.center;
+    } else if (this.type == "circle") {
+      let angle = Math.random() * Math.PI * 2;
+      let r = (Math.random() * this.size) / 2;
+      return this.center.clone().add(Math.cos(angle) * r, Math.sin(angle) * r);
+    } else if (
+      this.type == "box" ||
+      this.type == "square" ||
+      this.type == "rect"
+    ) {
+      let x = (Math.random() - 0.5) * this.size;
+      let y = (Math.random() - 0.5) * this.size;
+      return this.center.clone().add(x, y);
+    } else if (this.type == "line") {
+      let t = Math.random();
+      return this.b.clone().sub(this.a).mult(t, t).add(this.a);
+    }
   }
   update(dt) {
     // spawn new particles
-    this.particleSettings.count = this.particlesPerSecond * dt;
-    for (let i = 0; i < this.particleSettings.count; i++) {
-      this.add(this.particleSettings);
+    this.dt += dt;
+
+    let count = Math.floor(this.particlesPerSecond * this.dt);
+    if (count == 0) return;
+
+    this.dt -= count / this.particlesPerSecond;
+
+    for (let i = 0; i < count; i++) {
+      let pos = this.getPos();
+      this.particleSettings.x = pos.x;
+      this.particleSettings.y = pos.y;
+      this.spawn(this.particleSettings);
     }
   }
 }
 
 function makeTexture(opts) {
-  let size = opts.particleSize || 10;
+  let size = opts.particleSize || 3;
   const graphic = new PIXI.Graphics();
   graphic.beginFill(0xffffff);
   if (opts.squares) {
@@ -34,6 +74,7 @@ class Particle extends PIXI.Sprite {
     opts = opts || {};
     super(opts.texture);
 
+    this.opts = opts;
     this._alive = true;
     this.life = 0;
     this.shouldShrink = opts.shouldShrink || false;
@@ -42,14 +83,14 @@ class Particle extends PIXI.Sprite {
     this.size = Utils.getNumber(opts.size, this, 1);
     this.scale.x = this.scale.y = this.size;
 
-    this.lifetimeSeconds = Utils.getNumber(opts.lifetime, this, 0);
-    console.log(this.lifetimeSeconds);
-
-    this.vx = Utils.getNumber(opts.vx, this, 0);
-    this.vy = Utils.getNumber(opts.vy, this, 0);
+    this.lifetimeSeconds = Utils.getNumber(opts.life, this, 0);
 
     this.x = Utils.getNumber(opts.x, this, 0);
     this.y = Utils.getNumber(opts.y, this, 0);
+
+    this.vx = Utils.getNumber(opts.vx, this, 0);
+    this.vy = Utils.getNumber(opts.vy, this, 0);
+    this.v = new Vector(this.vx, this.vy);
 
     this.tint = Utils.getNumber(opts.color, this, 0xffffff);
 
@@ -58,6 +99,8 @@ class Particle extends PIXI.Sprite {
     this.alpha = Utils.getNumber(opts.alpha, this, 1);
 
     this.check = opts.check;
+
+    this.drag = opts.drag;
   }
   get alive() {
     return this._alive;
@@ -75,8 +118,8 @@ class Particle extends PIXI.Sprite {
 
   applyForce(force) {
     let value = force(this);
-    this.vx += value.x;
-    this.vy += value.y;
+    if (value == undefined || value == null) return;
+    this.v.add(value);
   }
 
   update(dt) {
@@ -95,9 +138,13 @@ class Particle extends PIXI.Sprite {
     if (this.shouldDisappear) {
       this.alpha = 1 - this.life / this.lifetimeSeconds;
     }
+    if (this.drag) {
+      this.v.x *= this.drag;
+      this.v.y *= this.drag;
+    }
 
-    this.x += this.vx * dt;
-    this.y += this.vy * dt;
+    this.x += this.v.x * dt;
+    this.y += this.v.y * dt;
 
     if (this.check && this.check(this)) {
       this.alive = false;
@@ -108,7 +155,7 @@ class Particle extends PIXI.Sprite {
 class Particles extends PIXI.ParticleContainer {
   constructor(opts) {
     opts = opts || {};
-    let maxParticleCount = opts.maxCount || 10000;
+    let maxParticleCount = opts.maxCount ?? 10000;
     super(
       maxParticleCount,
       {
@@ -133,8 +180,9 @@ class Particles extends PIXI.ParticleContainer {
   }
   createEmitter(options) {
     let emitter = new ParticleEmitter(options);
-    emitter.add = this.createParticle.bind(this);
+    emitter.spawn = this.spawn.bind(this);
     this.emitters.push(emitter);
+    return emitter;
   }
   spawn(opts) {
     opts = opts || {};
@@ -170,103 +218,6 @@ class Particles extends PIXI.ParticleContainer {
       // apply forces
       for (let force of this.forces) {
         particle.applyForce(force);
-      }
-    }
-  }
-}
-
-class Utils {
-  static isDict(a) {
-    return a != undefined && a.constructor == Object;
-  }
-  static isObject(a) {
-    return Utils.isDict(a);
-  }
-  static isString(a) {
-    return typeof a === "string" || a instanceof String;
-  }
-  static isNumber(a) {
-    return typeof a === "number";
-  }
-  static isFunction(a) {
-    return typeof a === "function";
-  }
-  static isArray(a) {
-    return Array.isArray(a);
-  }
-  static isBool(a) {
-    return typeof a === "boolean";
-  }
-  static isNull(a) {
-    return a === null;
-  }
-  static isDefined(a) {
-    return a !== undefined;
-  }
-  static firstDefined(...arr) {
-    if (arr == undefined) return;
-
-    for (let element of arr) {
-      if (element != undefined) return element;
-    }
-  }
-  static deepClone(a) {
-    if (!Utils.isDict(a)) return a;
-
-    let myClone = {};
-    for (let k of Object.keys(a)) {
-      myClone[k] = Utils.deepClone(a[k]);
-    }
-    return myClone;
-  }
-
-  // merge dictionaries a and b with priority to a
-  static mergeTwoDicts(a, b) {
-    if (b == undefined) return Utils.deepClone(a);
-    if (a == undefined) return Utils.deepClone(b);
-
-    let result = Utils.deepClone(a);
-    for (let k of Object.keys(b)) {
-      if (a[k] == undefined) {
-        result[k] = Utils.deepClone(b[k]);
-      } else if (Utils.isDict(a[k]) && Utils.isDict(b[k])) {
-        result[k] = Utils.mergeTwoDicts(a[k], b[k]);
-      }
-    }
-    return result;
-  }
-
-  static merge(...arr) {
-    let result = arr[0];
-    for (let i = 1; i < arr.length; i++) {
-      result = Utils.mergeTwoDicts(result, arr[i]);
-    }
-    return result;
-  }
-
-  /**
-   * get a number from a variable
-   * if variable is a number, return it
-   * if variable is a function, call it with settings and return the result
-   * if variable is a dictionary, return a random number between min and max
-   *
-   * @param {*} obj
-   * @param {*} settings
-   * @returns
-   */
-  static getNumber(obj, settings, defaultVal) {
-    if (obj == undefined) return defaultVal;
-
-    if (Utils.isNumber(obj)) {
-      return obj;
-    }
-    if (Utils.isFunction(obj)) {
-      return obj(settings);
-    }
-    if (Utils.isDict(obj)) {
-      if (Utils.isNumber(obj.min) && Utils.isNumber(obj.max)) {
-        let rng = settings.rng || Math.random;
-        return obj.min + rng() * (obj.max - obj.min);
       }
     }
   }
