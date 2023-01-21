@@ -11,3 +11,11 @@ A simple particle system for pixi.js.
 - Drag: apply drag to particle velocity
 - Forces: apply forces to particles
 - Particles can shrink or disappear over time
+
+### Examples
+
+- [simple](https://flo-bit.github.io/pixi-particles/demos/simple.html)
+- [simple emitters](https://flo-bit.github.io/pixi-particles/demos/emitters.html)
+- [moving emitters](https://flo-bit.github.io/pixi-particles/demos/moving_emitters.html)
+- [flowfield](https://flo-bit.github.io/pixi-particles/demos/flowfield.html)
+- [snow](https://flo-bit.github.io/pixi-particles/demos/snow.html)
