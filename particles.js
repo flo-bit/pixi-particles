@@ -55,21 +55,21 @@ class ParticleEmitter {
   }
 }
 
-function makeTexture(opts) {
-  let size = opts.particleSize || 3;
-  const graphic = new PIXI.Graphics();
-  graphic.beginFill(0xffffff);
-  if (opts.squares) {
-    graphic.drawRect(-size, -size, size * 2, size * 2);
-  } else {
-    graphic.drawCircle(0, 0, size);
-  }
-  graphic.endFill();
-  let texture = opts.renderer.generateTexture(graphic);
-  return texture;
-}
-
 class Particle extends PIXI.Sprite {
+  static makeTexture(renderer, size, shape) {
+    size = size ?? 1;
+    const graphic = new PIXI.Graphics();
+    graphic.beginFill(0xffffff);
+    if (shape == "square" || shape == "rect") {
+      graphic.drawRect(-size, -size, size * 2, size * 2);
+    } else {
+      graphic.drawCircle(0, 0, size);
+    }
+    graphic.endFill();
+    let texture = renderer.generateTexture(graphic);
+    return texture;
+  }
+
   constructor(opts) {
     opts = opts || {};
     super(opts.texture);
@@ -77,8 +77,8 @@ class Particle extends PIXI.Sprite {
     this.opts = opts;
     this._alive = true;
     this.life = 0;
-    this.shouldShrink = opts.shouldShrink || false;
-    this.shouldDisappear = opts.shouldDisappear || false;
+    this.shouldShrink = opts.shouldShrink ?? false;
+    this.shouldDisappear = opts.shouldDisappear ?? false;
 
     this.size = Utils.getNumber(opts.size, this, 1);
     this.scale.x = this.scale.y = this.size;
@@ -92,9 +92,9 @@ class Particle extends PIXI.Sprite {
     this.vy = Utils.getNumber(opts.vy, this, 0);
     this.v = new Vector(this.vx, this.vy);
 
-    this.tint = Utils.getNumber(opts.color, this, 0xffffff);
+    this.tint = Utils.getNumber(opts.color ?? opts.tint, this, 0xffffff);
 
-    this.applyForces = opts.applyForces || true;
+    this.applyForces = opts.applyForces ?? true;
 
     this.alpha = Utils.getNumber(opts.alpha, this, 1);
 
@@ -102,6 +102,14 @@ class Particle extends PIXI.Sprite {
 
     this.drag = opts.drag;
   }
+
+  set color(c) {
+    this.tint = c;
+  }
+  get color() {
+    return this.tint;
+  }
+
   get alive() {
     return this._alive;
   }
@@ -168,11 +176,14 @@ class Particles extends PIXI.ParticleContainer {
       true
     );
     this.createParticleOptions = {
-      rendere: opts.renderer,
-      texture: makeTexture(opts),
+      texture:
+        opts.texture ??
+        Particle.makeTexture(
+          opts.renderer,
+          opts.maxSize ?? opts.size,
+          opts.shape
+        ),
     };
-    this.queue = [];
-    this.rng = opts.random || Math.random;
 
     this.emitters = [];
 

@@ -71,13 +71,15 @@
           /* START */
           this.text.text = this.particles.children.length;
           this.particles.update(elapsed);
+          // spawn 10 particles from 0, 0 with random velocity and a lifetime of 2-3 seconds
           this.particles.spawn({
             x: 0,
             y: 0,
             vx: () => (Math.random() - 0.5) * 500,
             vy: () => (Math.random() - 0.5) * 500,
             count: 10,
-            life: Math.random() + 1,
+            life: Math.random() + 2,
+            drag: 0.99,
           });
           /* END */
         }

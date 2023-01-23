@@ -60,11 +60,19 @@
           this.text.y = this.h / 2 - 50;
           this.root.addChild(this.text);
 
-          this.particles = new Particles({ renderer: this.app.renderer });
+          this.setupParticles();
+          /* END */
+        }
+        setupParticles() {
+          this.particles = new Particles({
+            renderer: this.app.renderer,
+            size: 5,
+            shape: "rect",
+          });
           this.particles.createEmitter({
             settings: {
-              vx: (p) => -(p.opts.x + 200) * 0.5, //(Math.random() - 0.5) * 50,
-              vy: (p) => -(p.opts.y + 200) * 0.5, //(Math.random() - 0.5) * 50,
+              vx: (p) => -(p.opts.x + 200) * 0.5,
+              vy: (p) => -(p.opts.y + 200) * 0.5,
               life: Math.random() + 0.5,
               color: 0xff0000,
               shouldDisappear: true,
@@ -82,9 +90,10 @@
               life: Math.random() + 1,
               color: 0x00ff00,
               shouldShrink: true,
+              size: 2,
             },
             center: new Vector(200, -200),
-            particlesPerSecond: 1000,
+            particlesPerSecond: 200,
             size: 300,
             type: "circle",
           });
@@ -99,7 +108,7 @@
                   600 *
                   (Math.random() + 0.5)
                 );
-              }, //(Math.random() - 0.5) * 900,
+              },
               vy: () => {
                 return (
                   Math.sin(a + Math.random() * 0.3) *
@@ -109,8 +118,8 @@
               },
               life: Math.random() + 1,
               color: 0x0000ff,
-              shouldShrink: true,
               drag: 0.97,
+              size: 0.5,
             },
             particlesPerSecond: 1000,
             size: 200,
@@ -139,7 +148,6 @@
             };
           });
           this.root.addChild(this.particles);
-          /* END */
         }
         animate() {
           /* Update your scene here */
@@ -147,16 +155,9 @@
           let total = PIXI.Ticker.shared.lastTime / 1000.0;
           /* START */
           this.text.text = this.particles.children.length;
+
           this.particles.update(elapsed);
           this.noise.shiftBy(0, elapsed * 100);
-          /*this.particles.spawn({
-            x: 0,
-            y: 0,
-            vx: () => (Math.random() - 0.5) * 500,
-            vy: () => (Math.random() - 0.5) * 500,
-            count: 10,
-            life: Math.random() + 1,
-          });*/
           /* END */
         }
         resizeRoot() {

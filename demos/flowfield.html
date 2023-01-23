@@ -40,18 +40,6 @@
           ticker.add(this.animate.bind(this));
         }
 
-        // rgb to hex, r,g,b in range 0-1
-        rgb(r, g, b) {
-          r = Math.max(0, Math.min(1, r));
-          g = Math.max(0, Math.min(1, g));
-          b = Math.max(0, Math.min(1, b));
-          return (
-            (Math.floor(r * 255) << 16) +
-            (Math.floor(g * 255) << 8) +
-            Math.floor(b * 255)
-          );
-        }
-
         setupScene() {
           /* setup your scene here */
           /* START */
@@ -72,8 +60,14 @@
           this.text.x = this.w / 2 - 10;
           this.text.y = this.h / 2 - 50;
           this.root.addChild(this.text);
-
-          this.particles = new Particles({ renderer: this.app.renderer });
+          this.setupParticles();
+          /* END */
+        }
+        setupParticles() {
+          this.particles = new Particles({
+            renderer: this.app.renderer,
+            size: 3,
+          });
           this.particles.createEmitter({
             settings: {
               life: Math.random() * 5 + 5,
@@ -95,12 +89,23 @@
             type: "box",
           });
 
+          // rgb to hex, r,g,b in range 0-1
+          let rgb = (r, g, b) => {
+            r = Math.max(0, Math.min(1, r));
+            g = Math.max(0, Math.min(1, g));
+            b = Math.max(0, Math.min(1, b));
+            return (
+              (Math.floor(r * 255) << 16) +
+              (Math.floor(g * 255) << 8) +
+              Math.floor(b * 255)
+            );
+          };
           this.noise = new Noise({ scl: 0.001, oct: 3 });
           this.particles.forces.push((part) => {
             let a = this.noise.get(part.x, part.y, 0) * Math.PI * 2;
 
             let l = part.v.length();
-            part.tint = this.rgb(
+            part.tint = rgb(
               Math.abs(part.v.x) / 200,
               (l - 200) / 200,
               Math.abs(part.v.y) / 300
@@ -113,7 +118,6 @@
             };
           });
           this.root.addChild(this.particles);
-          /* END */
         }
         animate() {
           /* Update your scene here */

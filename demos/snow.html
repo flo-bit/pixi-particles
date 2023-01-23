@@ -43,7 +43,7 @@
           /* setup your scene here */
           /* START */
           this.rect = new PIXI.Graphics();
-          this.rect.beginFill(0x0000aa);
+          this.rect.beginFill(0x000053);
           this.rect.drawRect(-this.w / 2, -this.h / 2, this.w, this.h);
           this.rect.endFill();
           this.rect.alpha = 0.2;
@@ -60,22 +60,23 @@
           this.text.y = this.h / 2 - 50;
           this.root.addChild(this.text);
 
+          this.setupParticles();
+          /* END */
+        }
+        setupParticles() {
           this.particles = new Particles({
             renderer: this.app.renderer,
-            particleSize: 2,
-            //squares: true,
+            size: 2,
           });
-          this.noise = new Noise({ scl: 0.008, oct: 3 });
+          this.noise = new Noise({ scl: 0.05, oct: 3 });
           this.particles.forces.push((part) => {
-            return {
-              x: this.noise.get(part.x, part.y) * 5,
-              y: 0,
-            };
+            let vec = Vector.fromAngle2D(
+              this.noise.get(part.x, part.y) * Math.PI * 8,
+              2
+            );
+            return vec;
           });
           this.root.addChild(this.particles);
-
-          this.root.addChild(this.particles);
-          /* END */
         }
         animate() {
           /* Update your scene here */
@@ -91,11 +92,8 @@
               max: this.w / 2,
             },
             y: -this.h / 2,
-            //y: (Math.random() - 0.5) * 400,
-            //vx: () => (Math.random() - 0.5) * 200,
             vy: (p) => p.size * 100 + 50,
-            lifetime: () => (Math.random() < 0.1 ? Math.random() * 5 : 0),
-            //color: () => Math.random() * 0xff,
+            lifetime: () => (Math.random() < 0.1 ? Math.random() * 5 : 100),
             alpha: () => Math.random() * 0.5 + 0.5,
             size: () => Math.pow(Math.random(), 3) * 2,
             count: 5,
