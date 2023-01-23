@@ -19,3 +19,7 @@ A simple particle system for pixi.js.
 - [moving emitters](https://flo-bit.github.io/pixi-particles/demos/moving_emitters.html)
 - [flowfield](https://flo-bit.github.io/pixi-particles/demos/flowfield.html)
 - [snow](https://flo-bit.github.io/pixi-particles/demos/snow.html)
+
+## License
+
+MIT License, see LICENSE file.
