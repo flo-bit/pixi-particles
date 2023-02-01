@@ -1,3 +1,8 @@
+import Noise from "https://flo-bit.github.io/every-noise/noise.js";
+import Utils from "https://flo-bit.github.io/js-utils/utils.js";
+import Vector from "https://flo-bit.github.io/js-utils/vector.js";
+import * as PIXI from "https://cdn.jsdelivr.net/npm/pixi.js@7.x/dist/pixi.min.mjs";
+
 class ParticleEmitter {
   constructor(opts) {
     this.type = opts?.type ?? "point";
@@ -209,6 +214,14 @@ class Particles extends PIXI.ParticleContainer {
     this.addChild(particle);
     return particle;
   }
+
+  /**
+   * function does the following:
+   *
+   * -
+   *
+   * @param {*} dt
+   */
   update(dt) {
     // go through all emitters and add new particles to the queue
     for (let emitter of this.emitters) {
@@ -232,4 +245,13 @@ class Particles extends PIXI.ParticleContainer {
       }
     }
   }
+
+  /**
+   * function that checks if two lines intersect
+   */
+
+  linesIntersect(a, b, c, d) {}
 }
+
+export { Particles, Particle, ParticleEmitter };
+export default Particles;

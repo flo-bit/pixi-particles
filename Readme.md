@@ -20,6 +20,20 @@ A simple particle system for pixi.js.
 - [flowfield](https://flo-bit.github.io/pixi-particles/demos/flowfield.html)
 - [snow](https://flo-bit.github.io/pixi-particles/demos/snow.html)
 
+## Use
+
+### import
+
+```js
+<script src="https://flo-bit.github.io/pixi-particles/particles.js"></script>
+```
+
+### Configuration
+
+```js
+let particles = new Particles({ renderer: pixiRenderer });
+```
+
 ## License
 
 MIT License, see LICENSE file.
