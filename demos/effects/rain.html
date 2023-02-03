@@ -1,0 +1,69 @@
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0"
+    />
+  </head>
+
+  <body style="overflow: hidden; background-color: black">
+    <script type="module">
+      import PixiScaffold from "https://flo-bit.github.io/pixi-scaffold/pixi-scaffold.js";
+      import Noise from "https://flo-bit.github.io/every-noise/noise.js";
+      import Vector from "https://flo-bit.github.io/js-utils/vector.js";
+      import Particles from "../../particles.js";
+      class Game {
+        w = 2000;
+        setup() {
+          this.text = PS.add({
+            text: "0",
+            fontSize: 35,
+            align: "left",
+            anchorX: 1,
+            x: PS.w / 2 - 10,
+            y: PS.h / 2 - 50,
+          });
+
+          this.setupParticles();
+        }
+        setupParticles() {
+          this.particles = new Particles({
+            renderer: PS.app.renderer,
+            size: 2,
+          });
+          this.noise = new Noise({ scl: 0.05, oct: 3 });
+          this.particles.forces.push((part) => {
+            let vec = Vector.fromAngle2D(
+              this.noise.get(part.x, part.y) * Math.PI * 8,
+              5
+            );
+            return vec;
+          });
+          PS.addChild(this.particles);
+        }
+        update(dt) {
+          this.text.text = this.particles.children.length;
+          this.particles.update(dt);
+
+          this.particles.spawn({
+            x: {
+              min: -PS.w / 2,
+              max: PS.w / 2,
+            },
+            y: -PS.h / 2,
+            vy: (p) => p.size * 1200 + 600,
+            lifetime: () => (Math.random() < 0.1 ? Math.random() * 5 : 100),
+            alpha: () => Math.random() * 0.5 + 0.2,
+            size: () => Math.pow(Math.random(), 3) * 1.3 + 0.3,
+            count: 50,
+            check: (p) => p.y > PS.h / 2,
+            color: 0x7799aa,
+          });
+        }
+      }
+      let game = new Game();
+      let app = new PixiScaffold(game);
+    </script>
+  </body>
+</html>

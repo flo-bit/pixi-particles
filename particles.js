@@ -5,19 +5,24 @@ import * as PIXI from "https://cdn.jsdelivr.net/npm/pixi.js@7.x/dist/pixi.min.mj
 
 class ParticleEmitter {
   constructor(opts) {
-    this.type = opts?.type ?? "point";
+    opts = opts || {};
+    this.type = opts.type ?? "point";
 
-    this.size = opts?.size ?? 10;
-    this.center = opts?.center ?? new Vector(0, 0);
-    this.a = opts?.a;
-    this.b = opts?.b;
+    this.size = new Vector(
+      opts.width ?? opts.w ?? opts.size ?? 10,
+      opts.height ?? opts.h ?? opts.size ?? 10
+    );
+
+    this.center = opts.center ?? new Vector(0, 0);
+    this.a = opts.a;
+    this.b = opts.b;
     if (this.a && this.b) {
       this.vec = this.b.clone().sub(this.a);
     }
 
-    this.particlesPerSecond = opts?.particlesPerSecond ?? 100;
+    this.particlesPerSecond = opts.particlesPerSecond ?? 100;
 
-    this.particleSettings = opts?.particleSettings ?? opts?.settings ?? {};
+    this.particleSettings = opts.particleSettings ?? opts.settings ?? {};
 
     this.dt = 0;
   }
@@ -27,15 +32,15 @@ class ParticleEmitter {
       return this.center;
     } else if (this.type == "circle") {
       let angle = Math.random() * Math.PI * 2;
-      let r = (Math.random() * this.size) / 2;
+      let r = (Math.random() * this.size.x) / 2;
       return this.center.clone().add(Math.cos(angle) * r, Math.sin(angle) * r);
     } else if (
       this.type == "box" ||
       this.type == "square" ||
       this.type == "rect"
     ) {
-      let x = (Math.random() - 0.5) * this.size;
-      let y = (Math.random() - 0.5) * this.size;
+      let x = (Math.random() - 0.5) * this.size.x;
+      let y = (Math.random() - 0.5) * this.size.y;
       return this.center.clone().add(x, y);
     } else if (this.type == "line") {
       let t = Math.random();

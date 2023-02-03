@@ -11,40 +11,33 @@
     <script type="module">
       import PixiScaffold from "https://flo-bit.github.io/pixi-scaffold/pixi-scaffold.js";
       import Noise from "https://flo-bit.github.io/every-noise/noise.js";
-      import Particles from "../particles.js";
+      import Particles from "../../particles.js";
 
       class Game {
         renderOptions = {
           clearBeforeRender: false,
           preserveDrawingBuffer: true,
         };
+        w = 2000;
+        h = 500;
         setup() {
-          /* setup your scene here */
-          /* START */
-          this.rect = new PIXI.Graphics();
-          this.rect.beginFill(0x000000);
-          this.rect.drawRect(
-            (-PS.w / 2) * 1.1,
-            (-PS.h / 2) * 1.1,
-            PS.w * 1.1,
-            PS.h * 1.1
-          );
-          this.rect.endFill();
-          this.rect.alpha = 0.1;
-          PS.addChild(this.rect);
-
-          this.text = new PIXI.Text("1000", {
-            fontFamily: "Arial",
-            fontSize: 35,
-            fill: 0xffffff,
-            align: "left",
+          PS.add({
+            shape: "rect",
+            width: PS.w * 2,
+            height: PS.h * 2,
+            fill: 0x000000,
+            alpha: 0.15,
           });
-          this.text.anchor.x = 1;
-          this.text.x = PS.w / 2 - 10;
-          this.text.y = PS.h / 2 - 50;
-          PS.addChild(this.text);
+
+          this.text = PS.add({
+            text: "0",
+            fontSize: 35,
+            align: "left",
+            anchorX: 1,
+            x: PS.w / 2 - 10,
+            y: PS.h / 2 - 50,
+          });
           this.setupParticles();
-          /* END */
         }
         setupParticles() {
           this.particles = new Particles({
@@ -56,7 +49,7 @@
               life: Math.random() * 5 + 5,
               color: 0xff0000,
               shouldShrink: true,
-              size: Math.random() * 0.8 + 0.5,
+              size: () => Math.pow(Math.random(), 3) * 1.2 + 0.3,
               drag: 0.98,
               check: (part) => {
                 return !(
@@ -68,7 +61,8 @@
               },
             },
             particlesPerSecond: 2000,
-            size: 1000,
+            w: PS.w,
+            h: PS.h,
             type: "box",
           });
 
@@ -83,7 +77,7 @@
               Math.floor(b * 255)
             );
           };
-          this.noise = new Noise({ scl: 0.001, oct: 3 });
+          this.noise = new Noise({ scl: 0.001, oct: 2 });
           this.particles.forces.push((part) => {
             let a = this.noise.get(part.x, part.y, 0) * Math.PI * 2;
 

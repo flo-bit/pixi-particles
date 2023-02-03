@@ -10,27 +10,19 @@
   <body style="overflow: hidden; background-color: black">
     <script type="module">
       import PixiScaffold from "https://flo-bit.github.io/pixi-scaffold/pixi-scaffold.js";
-      import Particles from "../particles.js";
+      import Particles from "../../particles.js";
 
       class Game {
         setup() {
-          this.rect = new PIXI.Graphics();
-          this.rect.beginFill(0x0000aa);
-          this.rect.drawRect(-PS.w / 2, -PS.h / 2, PS.w, PS.h);
-          this.rect.endFill();
-          this.rect.alpha = 0.2;
-          PS.addChild(this.rect);
-
-          this.text = new PIXI.Text("1000", {
-            fontFamily: "Arial",
+          this.text = PS.add({
+            text: "0",
             fontSize: 35,
             fill: 0xffffff,
             align: "left",
+            anchorX: 1,
+            x: PS.w / 2 - 10,
+            y: PS.h / 2 - 50,
           });
-          this.text.anchor.x = 1;
-          this.text.x = PS.w / 2 - 10;
-          this.text.y = PS.h / 2 - 50;
-          PS.addChild(this.text);
 
           this.particles = new Particles({ renderer: PS.app.renderer });
           PS.addChild(this.particles);

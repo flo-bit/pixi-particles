@@ -14,11 +14,17 @@ A simple particle system for pixi.js.
 
 ### Examples
 
-- [simple](https://flo-bit.github.io/pixi-particles/demos/simple.html)
-- [simple emitters](https://flo-bit.github.io/pixi-particles/demos/emitters.html)
-- [moving emitters](https://flo-bit.github.io/pixi-particles/demos/moving_emitters.html)
-- [flowfield](https://flo-bit.github.io/pixi-particles/demos/flowfield.html)
-- [snow](https://flo-bit.github.io/pixi-particles/demos/snow.html)
+#### Basic
+
+- [simple](https://flo-bit.github.io/pixi-particles/demos/basic/simple.html)
+- [simple emitters](https://flo-bit.github.io/pixi-particles/demos/basic/emitters.html)
+- [moving emitters](https://flo-bit.github.io/pixi-particles/demos/basic/moving_emitters.html)
+
+#### Effects
+
+- [flowfield](https://flo-bit.github.io/pixi-particles/demos/effects/flowfield.html)
+- [snow](https://flo-bit.github.io/pixi-particles/demos/effects/snow.html)
+- [rain](https://flo-bit.github.io/pixi-particles/demos/effects/snow.html)
 
 ## Use
 

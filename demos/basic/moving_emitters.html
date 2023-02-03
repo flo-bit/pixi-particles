@@ -12,37 +12,28 @@
       import PixiScaffold from "https://flo-bit.github.io/pixi-scaffold/pixi-scaffold.js";
       import Noise from "https://flo-bit.github.io/every-noise/noise.js";
       import Vector from "https://flo-bit.github.io/js-utils/vector.js";
-      import Particles from "../particles.js";
+      import Particles from "../../particles.js";
 
       class Game {
         setup() {
-          this.rect = new PIXI.Graphics();
-          this.rect.beginFill(0x0000aa);
-          this.rect.drawRect(-PS.w / 2, -PS.h / 2, PS.w, PS.h);
-          this.rect.endFill();
-          this.rect.alpha = 0.0;
-          PS.addChild(this.rect);
-
-          this.text = new PIXI.Text("1000", {
-            fontFamily: "Arial",
+          this.text = PS.add({
+            text: "0",
             fontSize: 35,
-            fill: 0xffffff,
             align: "left",
+            anchorX: 1,
+            x: PS.w / 2 - 10,
+            y: PS.h / 2 - 50,
           });
-          this.text.anchor.x = 1;
-          this.text.x = PS.w / 2 - 10;
-          this.text.y = PS.h / 2 - 50;
-          PS.addChild(this.text);
 
           this.setupParticles();
         }
         setupParticles() {
           this.particles = new Particles({
             renderer: PS.app.renderer,
-            size: 5,
-            shape: "rect",
+            size: 3,
           });
-          this.particles.createEmitter({
+          PS.addChild(this.particles);
+          this.boxEmitter = this.particles.createEmitter({
             settings: {
               vx: (p) => -(p.opts.x + 200) * 0.5,
               vy: (p) => -(p.opts.y + 200) * 0.5,
@@ -56,23 +47,22 @@
             size: 200,
             type: "box",
           });
-          this.particles.createEmitter({
+          this.circleEmitter = this.particles.createEmitter({
             settings: {
               vx: () => (Math.random() - 0.5) * 50,
               vy: () => (Math.random() - 0.5) * 50,
               life: Math.random() + 1,
               color: 0x00ff00,
               shouldShrink: true,
-              size: 2,
             },
             center: new Vector(200, -200),
-            particlesPerSecond: 200,
+            particlesPerSecond: 1000,
             size: 300,
             type: "circle",
           });
 
           let a = 0;
-          this.particles.createEmitter({
+          this.pointEmitter = this.particles.createEmitter({
             settings: {
               vx: () => {
                 a += 0.005;
@@ -81,7 +71,7 @@
                   600 *
                   (Math.random() + 0.5)
                 );
-              },
+              }, //(Math.random() - 0.5) * 900,
               vy: () => {
                 return (
                   Math.sin(a + Math.random() * 0.3) *
@@ -89,25 +79,25 @@
                   (Math.random() + 0.5)
                 );
               },
-              life: () => Math.random() + 0.3,
+              life: Math.random() + 1,
               color: 0x0000ff,
+              shouldShrink: true,
               drag: 0.97,
-              size: 0.5,
             },
             particlesPerSecond: 1000,
             size: 200,
           });
 
-          this.particles.createEmitter({
+          this.lineEmitter = this.particles.createEmitter({
             settings: {
-              vx: () => 0, //(Math.random() - 0.5) * 50,
-              vy: () => (Math.random() - 0.5) * 200,
+              vx: (p) => (Math.random() - 0.5) * 50,
+              vy: (p) => (Math.random() - 0.5) * 50,
               life: Math.random() + 1,
               color: 0xffff00,
               shouldShrink: true,
             },
-            a: new Vector(-500, 300),
-            b: new Vector(500, 300),
+            a: new Vector(-500, 0),
+            b: new Vector(500, 0),
             particlesPerSecond: 1000,
             size: 200,
             type: "line",
@@ -120,15 +110,30 @@
               y: this.noise.get(part.x, part.y) * 5,
             };
           });
-          PS.addChild(this.particles);
         }
-        update(dt) {
+        update(dt, total) {
           this.text.text = this.particles.children.length;
           this.particles.update(dt);
           this.noise.shiftBy(0, dt * 100);
+
+          // move emitters
+          // change position
+          this.boxEmitter.center.y = Math.cos(total) * 200;
+          this.pointEmitter.center.x = Math.cos(total) * 200;
+          // change size
+          this.circleEmitter.size.x = Math.cos(total) * 200 + 300;
+
+          // change a and b for line
+          this.lineEmitter.a = new Vector(
+            Math.cos(total * 0.2) * 500,
+            Math.sin(total * 0.2) * 500
+          );
+          this.lineEmitter.b = new Vector(
+            Math.cos(total * 0.2 + Math.PI) * 500,
+            Math.sin(total * 0.2 + Math.PI) * 500
+          );
         }
       }
-
       let game = new Game();
       let app = new PixiScaffold(game);
     </script>
