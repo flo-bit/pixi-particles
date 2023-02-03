@@ -258,5 +258,5 @@ class Particles extends PIXI.ParticleContainer {
   linesIntersect(a, b, c, d) {}
 }
 
-export { Particles, Particle, ParticleEmitter };
+export { Particles, Particle, ParticleEmitter, Utils, Noise, Vector, PIXI };
 export default Particles;
