@@ -14,14 +14,23 @@
       import Particles from "../particles.js";
 
       class Game {
+        renderOptions = {
+          clearBeforeRender: false,
+          preserveDrawingBuffer: true,
+        };
         setup() {
           /* setup your scene here */
           /* START */
           this.rect = new PIXI.Graphics();
-          this.rect.beginFill(0x0000aa);
-          this.rect.drawRect(-PS.w / 2, -PS.h / 2, PS.w, PS.h);
+          this.rect.beginFill(0x000000);
+          this.rect.drawRect(
+            (-PS.w / 2) * 1.1,
+            (-PS.h / 2) * 1.1,
+            PS.w * 1.1,
+            PS.h * 1.1
+          );
           this.rect.endFill();
-          this.rect.alpha = 0.0;
+          this.rect.alpha = 0.1;
           PS.addChild(this.rect);
 
           this.text = new PIXI.Text("1000", {
@@ -96,7 +105,7 @@
         update(dt) {
           this.text.text = this.particles.children.length;
           this.particles.update(dt);
-          this.noise.shiftBy(0, 0, dt * 100);
+          this.noise.shiftBy(0, 0, dt * 50);
         }
       }
       let game = new Game();
