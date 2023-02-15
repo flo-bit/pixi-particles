@@ -1,7 +1,8 @@
-import Noise from "https://flo-bit.github.io/every-noise/noise.js";
-import Utils from "https://flo-bit.github.io/js-utils/utils.js";
-import Vector from "https://flo-bit.github.io/js-utils/vector.js";
 import * as PIXI from "https://cdn.jsdelivr.net/npm/pixi.js@7.x/dist/pixi.min.mjs";
+
+import Noise from "../every-noise/noise.js";
+import Utils from "../js-utils/utils.js";
+import Vector from "../js-utils/vector.js";
 
 class ParticleEmitter {
   constructor(opts) {
