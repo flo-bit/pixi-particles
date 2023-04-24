@@ -16,15 +16,15 @@ A simple particle system for pixi.js.
 
 #### Basic
 
-- [simple](https://flo-bit.github.io/pixi-particles/demos/basic/simple.html)
-- [simple emitters](https://flo-bit.github.io/pixi-particles/demos/basic/emitters.html)
-- [moving emitters](https://flo-bit.github.io/pixi-particles/demos/basic/moving_emitters.html)
+- [simple ![simple](./images/simple.png)](https://flo-bit.github.io/pixi-particles/demos/basic/simple.html)
+- [emitters ![simple emitters](./images/emitters.png)](https://flo-bit.github.io/pixi-particles/demos/basic/emitters.html)
+- [moving emitters ![moving emitters](./images/moving-emitters.png)](https://flo-bit.github.io/pixi-particles/demos/basic/moving_emitters.html)
 
 #### Effects
 
-- [flowfield](https://flo-bit.github.io/pixi-particles/demos/effects/flowfield.html)
-- [snow](https://flo-bit.github.io/pixi-particles/demos/effects/snow.html)
-- [rain](https://flo-bit.github.io/pixi-particles/demos/effects/snow.html)
+- [flowfield![flowfield](./images/flowfield.png)](https://flo-bit.github.io/pixi-particles/demos/effects/flowfield.html)
+- [snow ![snow](./images/snow.png)](https://flo-bit.github.io/pixi-particles/demos/effects/snow.html)
+- [rain ![rain](./images/rain.png)](https://flo-bit.github.io/pixi-particles/demos/effects/rain.html)
 
 ## Use
 
