@@ -4,6 +4,29 @@ import Noise from "../every-noise/noise.js";
 import Utils from "../js-utils/utils.js";
 import Vector from "../js-utils/vector.js";
 
+/**
+ * A particle emitter
+ *
+ * @class ParticleEmitter
+ *
+ * @param {object} opts
+ * @param {string} opts.type - "point", "circle", "box", "line"
+ *
+ * @param {number} opts.size - size of circle or box
+ *
+ * @param {number} opts.width - width of box
+ * @param {number} opts.height - height of box
+ *
+ * @param {Vector} opts.center - center of emitter
+ *
+ * @param {Vector} opts.a - start of line
+ * @param {Vector} opts.b - end of line
+ *
+ * @param {number} opts.particlesPerSecond - number of particles to spawn per second
+ *
+ * @param {object} opts.particleSettings - settings to pass to Particle constructor
+ *
+ */
 class ParticleEmitter {
   constructor(opts) {
     opts = opts || {};
@@ -66,6 +89,34 @@ class ParticleEmitter {
   }
 }
 
+/**
+ * A particle
+ *
+ * @class Particle
+ *
+ * @param {object} opts
+ *
+ * @param {number|function} opts.x - x position
+ * @param {number|function} opts.y - y position
+ *
+ * @param {number|function} opts.vx - x velocity
+ * @param {number|function} opts.vy - y velocity
+ *
+ * @param {number|function} opts.life - lifetime in seconds
+ *
+ * @param {number|function} opts.size - size of particle relative to max size (1.0 = max size)
+ *
+ * @param {number} opts.color - color of particle
+ * @param {number} opts.alpha - alpha value of particle
+ *
+ * @param {boolean} opts.shouldShrink - should particle shrink over time
+ * @param {boolean} opts.shouldDisappear - should particle disappear over time
+ *
+ * @param {boolean} opts.applyForces - should particle be affected by forces
+ * @param {number} opts.drag - drag coefficient
+ *
+ * @param {function} opts.check - function to check if particle should be removed (return true to remove)
+ */
 class Particle extends PIXI.Sprite {
   static makeTexture(renderer, size, shape) {
     size = size ?? 1;
@@ -105,7 +156,7 @@ class Particle extends PIXI.Sprite {
 
     this.tint = Utils.getNumber(opts.color ?? opts.tint, this, 0xffffff);
 
-    this.applyForces = opts.applyForces ?? true;
+    this.applyForces = opts.applyForces ?? false;
 
     this.alpha = Utils.getNumber(opts.alpha, this, 1);
 
@@ -136,6 +187,8 @@ class Particle extends PIXI.Sprite {
   }
 
   applyForce(force) {
+    if (!this.applyForces) return;
+
     let value = force(this);
     if (value == undefined || value == null) return;
     this.v.add(value);
@@ -157,7 +210,7 @@ class Particle extends PIXI.Sprite {
     if (this.shouldDisappear) {
       this.alpha = 1 - this.life / this.lifetimeSeconds;
     }
-    if (this.drag) {
+    if (this.drag != undefined) {
       this.v.x *= this.drag;
       this.v.y *= this.drag;
     }
@@ -171,7 +224,20 @@ class Particle extends PIXI.Sprite {
   }
 }
 
-class Particles extends PIXI.ParticleContainer {
+/**
+ * A particle container
+ *
+ * @class ParticleContainer
+ *
+ * @param {object} opts
+ * @param {number} opts.maxCount - maximum number of particles
+ * @param {number} opts.maxSize - maximum size of particles
+ * @param {string} opts.shape - shape of particles (circle or square)
+ *
+ * @param {PIXI.Renderer} opts.renderer - renderer to use for generating textures
+ *
+ */
+class ParticleContainer extends PIXI.ParticleContainer {
   constructor(opts) {
     opts = opts || {};
     let maxParticleCount = opts.maxCount ?? 10000;
@@ -186,19 +252,28 @@ class Particles extends PIXI.ParticleContainer {
       undefined,
       true
     );
-    this.createParticleOptions = {
-      texture:
-        opts.texture ??
-        Particle.makeTexture(
-          opts.renderer,
-          opts.maxSize ?? opts.size,
-          opts.shape
-        ),
-    };
+
+    this.particleTexture =
+      opts.texture ??
+      Particle.makeTexture(
+        opts.renderer,
+        opts.maxSize ?? opts.size,
+        opts.shape
+      );
 
     this.emitters = [];
+    if (opts.emitters) {
+      for (let e of opts.emitters) {
+        this.createEmitter(e);
+      }
+    }
 
     this.forces = [];
+    if (opts.forces) {
+      for (let f of opts.forces) {
+        this.forces.push(f);
+      }
+    }
   }
   createEmitter(options) {
     let emitter = new ParticleEmitter(options);
@@ -215,7 +290,7 @@ class Particles extends PIXI.ParticleContainer {
     }
   }
   createParticle(settings) {
-    settings = Utils.merge(settings, this.createParticleOptions);
+    settings.texture = this.particleTexture;
     let particle = new Particle(settings);
     this.addChild(particle);
     return particle;
@@ -224,7 +299,10 @@ class Particles extends PIXI.ParticleContainer {
   /**
    * function does the following:
    *
-   * -
+   * - updates all emitters
+   * - updates all particles
+   * - applies forces to all particles
+   * - removes dead particles
    *
    * @param {*} dt
    */
@@ -251,13 +329,15 @@ class Particles extends PIXI.ParticleContainer {
       }
     }
   }
-
-  /**
-   * function that checks if two lines intersect
-   */
-
-  linesIntersect(a, b, c, d) {}
 }
 
-export { Particles, Particle, ParticleEmitter, Utils, Noise, Vector, PIXI };
-export default Particles;
+export {
+  ParticleContainer as Particles,
+  Particle,
+  ParticleEmitter,
+  Utils,
+  Noise,
+  Vector,
+  PIXI,
+};
+export default ParticleContainer;
